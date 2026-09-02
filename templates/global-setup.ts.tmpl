@@ -1,0 +1,38 @@
+import { chromium, FullConfig } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * Connexion unique à la recette avant la suite de tests, dont l'état
+ * (cookies/storage) est réutilisé par tous les tests via storageState.
+ * Les identifiants viennent uniquement de recette/.env.recette
+ * (jamais lu par le modèle — voir .claude/settings.json).
+ */
+export default async function globalSetup(_config: FullConfig) {
+  const baseURL = process.env.RECETTE_BASE_URL;
+  const user = process.env.RECETTE_USER;
+  const password = process.env.RECETTE_PASSWORD;
+
+  if (!baseURL || !user || !password) {
+    throw new Error(
+      'RECETTE_BASE_URL / RECETTE_USER / RECETTE_PASSWORD manquants. ' +
+        'Renseigne-les dans recette/.env.recette (voir recette/.env.recette.example).'
+    );
+  }
+
+  const authDir = path.resolve(__dirname, '.auth');
+  fs.mkdirSync(authDir, { recursive: true });
+
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+  await page.goto(baseURL);
+
+  // TODO : adapter les sélecteurs de connexion au projet cible.
+  await page.getByLabel(/identifiant|email|utilisateur/i).fill(user);
+  await page.getByLabel(/mot de passe|password/i).fill(password);
+  await page.getByRole('button', { name: /connexion|login|se connecter/i }).click();
+  await page.waitForLoadState('networkidle');
+
+  await page.context().storageState({ path: path.join(authDir, 'state.json') });
+  await browser.close();
+}

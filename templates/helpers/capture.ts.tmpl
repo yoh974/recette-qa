@@ -1,0 +1,31 @@
+import { Page, TestInfo } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+/**
+ * Capture une étape de test en jpeg compressé, rangée par run / thème / cas de test :
+ * recette/reports/<run-id>/<theme>/screenshots/<cas>__<step>.jpg
+ *
+ * N'appeler qu'aux points utiles (résultat attendu, échec) — pas à chaque action —
+ * pour garder les rapports légers sur disque.
+ *
+ * Usage : await captureStep(page, testInfo, 'resultat-final');
+ */
+export async function captureStep(page: Page, testInfo: TestInfo, stepName: string) {
+  const runId = process.env.RECETTE_RUN_ID || 'run-manuel';
+  const theme = path.basename(path.dirname(testInfo.file));
+  const dir = path.resolve(process.cwd(), 'recette/reports', runId, theme, 'screenshots');
+  fs.mkdirSync(dir, { recursive: true });
+
+  const file = path.join(dir, `${sanitize(testInfo.title)}__${sanitize(stepName)}.jpg`);
+  await page.screenshot({ path: file, type: 'jpeg', quality: 55, fullPage: false });
+  return file;
+}
+
+function sanitize(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+}

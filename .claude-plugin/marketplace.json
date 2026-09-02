@@ -1,0 +1,11 @@
+{
+  "name": "recette-qa-marketplace",
+  "owner": { "name": "Lionel" },
+  "plugins": [
+    {
+      "name": "recette-qa",
+      "source": "./",
+      "description": "Workflow de recette QA : cahier de recette, exécution Playwright, rapport avec captures d'écran."
+    }
+  ]
+}

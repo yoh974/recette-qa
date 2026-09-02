@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(./recette/.env.recette)",
+      "Read(recette/.env.recette)",
+      "Grep(./recette/.env.recette)",
+      "Bash(cat *recette/.env.recette*)",
+      "Bash(*recette/.env.recette*)"
+    ]
+  }
+}

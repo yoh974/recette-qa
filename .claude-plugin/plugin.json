@@ -1,0 +1,6 @@
+{
+  "name": "recette-qa",
+  "description": "Workflow de recette QA : rédaction du cahier de recette (cas de test + specs Playwright) après une feature/fix, exécution des tests dans un navigateur, tests de non-régression (TNR) sur les cas critiques, et rapport de test avec captures d'écran.",
+  "version": "0.1.0",
+  "author": { "name": "Lionel" }
+}

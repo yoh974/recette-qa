@@ -1,0 +1,34 @@
+import { defineConfig, devices } from '@playwright/test';
+import * as dotenv from 'dotenv';
+import path from 'path';
+
+// Fichier secret : URL de la recette + identifiants. Jamais lu par le modèle
+// (règle deny dans .claude/settings.json), jamais commité (.gitignore).
+dotenv.config({ path: path.resolve(__dirname, 'recette/.env.recette') });
+
+export default defineConfig({
+  testDir: './recette/tests',
+  outputDir: './recette/reports/.artifacts',
+  fullyParallel: true,
+  retries: process.env.CI ? 1 : 0,
+  reporter: [
+    ['list'],
+    ['json', { outputFile: './recette/reports/.last-run.json' }],
+    ['html', { open: 'never', outputFolder: './recette/reports/.html' }],
+  ],
+  use: {
+    baseURL: process.env.RECETTE_BASE_URL,
+    trace: 'retain-on-failure',
+    // Captures pilotées manuellement par les tests (recette/tests/helpers/capture.ts)
+    // pour limiter le nombre et le poids des images sur disque.
+    screenshot: 'off',
+    video: 'off',
+  },
+  globalSetup: require.resolve('./recette/global-setup.ts'),
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'], storageState: './recette/.auth/state.json' },
+    },
+  ],
+});
